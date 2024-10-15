@@ -7,17 +7,32 @@ const express = require('express');
 
 //main server
 const app = express();
+
+const {adminAuth , userAuth}= require('./middlewares/auth');
 //request handler function as arrow function
-app.get("/test",
+//handle auth for all http request get , post , delete etc 
+//middleware for authentication
+app.use("/admin" ,adminAuth);
+app.get("/admin/getAllData",
     (req,res,next)=>{
    
-    //route handler function
-    next();
-    res.send("hello from server with get api request from first route handler");
-    },
-(req,res)=>{
+    
+    res.send("hello , this is the data");
+    }
+);
+app.delete("/admin/delete",(req,res)=>{
+    res.send("data deleted successfully");
+});
 
-    res.send("hello from server with get api request from second route handler");
+app.get("/user/login",
+    (req,res,next)=>{
+   
+    
+    res.send("hello , this is the user");
+    }
+);
+app.delete("/user/delete",userAuth,(req,res)=>{
+    res.send("user deleted successfully");
 });
 
 app.listen(3000,()=>{
