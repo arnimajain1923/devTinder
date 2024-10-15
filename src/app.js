@@ -15,11 +15,16 @@ const {adminAuth , userAuth}= require('./middlewares/auth');
 app.use("/admin" ,adminAuth);
 app.get("/admin/getAllData",
     (req,res,next)=>{
-   
-    
-    res.send("hello , this is the data");
+    try{
+    throw new Error("errooorrrrrrr");
+        
+        res.send("hello , this is the data");
+    }catch(err){
+        res.status(500).send("error fetching data");
     }
-);
+});
+
+
 app.delete("/admin/delete",(req,res)=>{
     res.send("data deleted successfully");
 });
@@ -34,6 +39,14 @@ app.get("/user/login",
 app.delete("/user/delete",userAuth,(req,res)=>{
     res.send("user deleted successfully");
 });
+
+app.use("/",(err,req,res,next)=>{
+    if(err){
+        //can log errors 
+        console.log(err);
+        res.status(500).send("something went wrong");
+    }
+}); 
 
 app.listen(3000,()=>{
     console.log('server is running on port 3000');

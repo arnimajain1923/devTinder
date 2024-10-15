@@ -1,6 +1,6 @@
 const adminAuth =  (req, res , next)=>{
     const token = "345";
-    const isAuthorized = token === "3456";
+    const isAuthorized = token === "345";
     console.log("authentication is being done");
     if(isAuthorized){
         
