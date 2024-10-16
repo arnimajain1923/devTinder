@@ -3,51 +3,31 @@
 
 //imports
 const express = require('express');
-
-
-//main server
+const connectDB = require("./config/database");
+const User = require("./models/user");
 const app = express();
 
-const {adminAuth , userAuth}= require('./middlewares/auth');
-//request handler function as arrow function
-//handle auth for all http request get , post , delete etc 
-//middleware for authentication
-app.use("/admin" ,adminAuth);
-app.get("/admin/getAllData",
-    (req,res,next)=>{
-    try{
-    throw new Error("errooorrrrrrr");
-        
-        res.send("hello , this is the data");
-    }catch(err){
-        res.status(500).send("error fetching data");
-    }
+app.use(express.json());
+//user signup api 
+app.post("/signup",async(req,res)=>{
+    //creating a new instance of user model
+    const user = new User(req.body);
+ try{
+    await user.save();
+    res.send("user added succesfully");
+ }catch(err){
+    res.status(401).send("error saving the user!!!",err);
+ }
 });
-
-
-app.delete("/admin/delete",(req,res)=>{
-    res.send("data deleted successfully");
-});
-
-app.get("/user/login",
-    (req,res,next)=>{
-   
-    
-    res.send("hello , this is the user");
-    }
-);
-app.delete("/user/delete",userAuth,(req,res)=>{
-    res.send("user deleted successfully");
-});
-
-app.use("/",(err,req,res,next)=>{
-    if(err){
-        //can log errors 
-        console.log(err);
-        res.status(500).send("something went wrong");
-    }
-}); 
-
-app.listen(3000,()=>{
-    console.log('server is running on port 3000');
+//connection to devTinder database
+connectDB()
+.then(()=>{
+    console.log("database connection established");
+    //listening application on port
+    app.listen(3000,()=>{
+        console.log('server is running on port 3000');
+    }); 
+})
+.catch(err=>{
+    console.log("database cannot connect" , err);
 });

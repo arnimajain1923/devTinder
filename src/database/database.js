@@ -1,1 +1,0 @@
-const URL ="mongodb+srv://ArnimaJain:Arnima@1902@user-data.icewz.mongodb.net/";
