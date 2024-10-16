@@ -16,7 +16,8 @@ app.post("/signup",async(req,res)=>{
     await user.save();
     res.send("user added succesfully");
  }catch(err){
-    res.status(400).send("error saving the user!!!",err);
+    console.log(err);
+    res.status(400).send(err);
  }
 });
 
@@ -95,11 +96,14 @@ app.delete("/user",async(req,res)=>{
 
 //update user by email
 app.patch("/user/email",async(req,res)=>{
+
     const data = req.body;
     const userEmail = req.body.emailId;
     try{
         
-        let user= await User.updateOne({emailId:userEmail},data);
+        let user= await User.updateOne({emailId:userEmail},data,{
+            runValidators:true,
+        });
         if(user.length===0){
           res.status(404).send("user does not exist");  
         }
@@ -109,7 +113,7 @@ app.patch("/user/email",async(req,res)=>{
         }
         
     }catch(err){
-        res.status(400).send("something went wrong");
+        res.status(400).send("Update data failed" + err.message);
     }
 });
 
@@ -119,7 +123,10 @@ app.patch("/user",async(req,res)=>{
     const userId = req.body._id;
     try{
         
-        const user = await User.findByIdAndUpdate(userId , data,{new:true}); 
+        const user = await User.findByIdAndUpdate(userId , data,{
+            returnDocument:"after",
+            runValidators:true,
+        }); 
         if(user.length===0){
           res.status(404).send("user does not exist");  
         }
