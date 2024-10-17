@@ -25,11 +25,12 @@ const userSchema = new mongoose.Schema(
         required:true,
         minLength:8,
         maxLength:50,
+        
     },
     age:{
         type:Number,
         min: 18,
-        maxLength:3,
+        max:150,
     },
     gender:{
         type:String,
@@ -51,9 +52,34 @@ const userSchema = new mongoose.Schema(
     skills:{
         type:[String],
     },
+    interest:{
+        type:[String],
+        validate(value){
+           if(! [
+            "coding partners" ,
+            "networking ",
+            "open-source",
+            "learning",
+            "mentorship",
+            "side projects", 
+            "job","freelance",
+            "hackathons", 
+            "code review",
+            "dbms",
+            "startup",
+            "pair programming",
+            "tech-trends", 
+            "event",
+            "other"
+           ].includes(value)){
+            throw new Error("The interest you mentioned is not appropriate");
+            }
+        
+        }
+    }
 },
 {
-    timestamps: true ,
+    timestamps: true,
    }
 );
 
