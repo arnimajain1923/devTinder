@@ -95,48 +95,55 @@ app.delete("/user",async(req,res)=>{
 });
 
 //update user by email
-app.patch("/user/email",async(req,res)=>{
+// app.patch("/user/email",async(req,res)=>{
 
-    const data = req.body;
-    const userEmail = req.body.emailId;
-    try{
+//     const data = req.body;
+//     const userEmail = req.body.emailId;
+//     try{
         
-        let user= await User.updateOne({emailId:userEmail},data,{
-            runValidators:true,
-        });
-        if(user.length===0){
-          res.status(404).send("user does not exist");  
-        }
-        else{
-            console.log(user);
-            res.send("user updated succesfully");
-        }
+//         let user= await User.updateOne({emailId:userEmail},data,{
+//             runValidators:true,
+//         });
+//         if(user.length===0){
+//           res.status(404).send("user does not exist");  
+//         }
+//         else{
+//             console.log(user);
+//             res.send("user updated succesfully");
+//         }
         
-    }catch(err){
-        res.status(400).send("Update data failed" + err.message);
-    }
-});
+//     }catch(err){
+//         res.status(400).send("Update data failed" + err.message);
+//     }
+// });
 
 //update user by id
-app.patch("/user",async(req,res)=>{
+app.patch("/user/:userId",async(req,res)=>{
     const data = req.body;
-    const userId = req.body._id;
-    try{
+    const userId = req.params?.userId;
         
-        const user = await User.findByIdAndUpdate(userId , data,{
+    try{
+        const ALLOWED_UPDATES =[
+         "photoUrl","about","gender","interest","skills","password","age"
+        ];
+        const isUpdateAllowed = Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k));
+        if(!isUpdateAllowed){
+            throw new Error("update not allowed");
+        }
+        else{
+            const user = await User.findByIdAndUpdate 
+        ({_id : userId } , data,{
             returnDocument:"after",
             runValidators:true,
         }); 
-        if(user.length===0){
-          res.status(404).send("user does not exist");  
+       
+        console.log(user);
+        res.send("user updated succesfully");
         }
-        else{
-            console.log(user);
-            res.send("user updated succesfully");
-        }
+
         
     }catch(err){
-        res.status(400).send("something went wrong");
+        res.status(400).send("user updation failed- " + err.message);
     }
 });
 
