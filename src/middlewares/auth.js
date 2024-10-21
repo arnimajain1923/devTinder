@@ -1,29 +1,33 @@
-const adminAuth =  (req, res , next)=>{
-    const token = "345";
-    const isAuthorized = token === "345";
-    console.log("authentication is being done");
-    if(isAuthorized){
-        
-        next();  
+const jwt = require('jsonwebtoken');
+const User = require("../models/user");
+const userAuth = async (req, res , next)=>{
+    try{
+    //read the token from the req cookies 
+    const {token} = req.cookies;
+    if(!token){
+        throw new Error(JSON.stringify({message:"ERROR!!! invalid token"}));
     }
-    else{
-        res.status(401).send("unauthorised , access denied");
-    }
-}
+    const decodedObj = await jwt.verify(token ,"develop@js#node"  );
 
-const userAuth =  (req, res , next)=>{
-    const token = "345";
-    const isAuthorized = token === "3456";
-    console.log("authentication is being done");
-    if(isAuthorized){
-        
-        next();  
-    }
+    //validate the token
+
+    const{_id} = decodedObj;
+    const user = await User.findById(_id);
+
+    if(!user){
+        throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
+        }
     else{
-        res.status(401).send("unauthorised user, access denied");
+            req.user = user;
+            next();
+            //move to request handler
+        }
+    }catch(err){
+        console.log(err);
+        res.status(400).send(err.message);
     }
 }
 
 module.exports = {
-    adminAuth,userAuth
+    userAuth
 };

@@ -7,9 +7,16 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const {validateUser} = require("./utils/validation");
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const { userAuth }= require("./middlewares/auth");
+
+const morgan = require('morgan');
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(morgan('dev'));
 //user signup api 
 app.post("/signup",async(req,res)=>{
 
@@ -61,13 +68,21 @@ try{
 if(!user){
     throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
 }
-const isPasswordValid = await bcrypt.compare(password, user.password);
+const isPasswordValid = await user.PasswordVerification(password);
 
 if(!isPasswordValid){
     throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
 }
 else{
+    //create token from schema helper /util function
+    const token = await user.getJWT();
+
+    //  add the token to cookie and send the response back to user
+    const cookies =  res.cookie("token",token ,{ maxAge: 30*24*60*60*1000, httpOnly: true  });
+    //cookie expires in 30 days
+    // console.log(token);
     console.log("user login succesfully!!");
+   
     res.send(user);
 }
 }catch(err){
@@ -75,140 +90,185 @@ else{
     res.status(400).send(err.message);
 }
 });
-//feed API - get/feed - get all users from the databse
-app.get("/feed",async(req,res)=>{
+
+//profile api - get user profile only
+app.get("/profile", userAuth ,async (req,res)=>{
+    
+    try
+    {
+        const user = req.user;
+        if(!user){
+            throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
+        }
+        res.send(user);
+    }catch(err){
+        console.log(err);
+        res.status(400).send(err.message);
+    }
+
+});
+
+//send Request api
+app.post("/sendRequest", userAuth , async(req,res)=>{
+    try{
+         const user = req.user;
+        if(!user){
+            throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
+        }
+        res.send(user.firstName +" sent a new connection request");
+        }
+    catch(err){
+        console.log(err);
+        res.status(400).send(err.message);
+        }
+
+    
+})
+
+
+// //feed API - get/feed - get all users from the databse
+// app.get("/feed", userAuth,async(req,res)=>{
    
-    try{
-        const users = await User.find({});
-        if(users.length===0){
-            throw new Error(JSON.stringify({message:'ERROR :users does not exist'}));
-        }
-        else{
-            res.send(users);
-        }
-        
-    }catch(err){
-        console.log(err);
-        res.status(400).send(err.message);
-    }
-});
-
-//get user by id
-app.get("/user/:id",async(req,res)=>{
-    const id = req.params?.id;
-  try{
-        const user = await User.findById(id);
-        if(!user){
-            throw new Error(JSON.stringify({message:'ERROR :invalid credentials'})); 
-        }
-        else{
-            res.send(user);
-        }
-    }catch(err){
-        console.log(err);
-        res.status(400).send(err.message);
-    }
-});
-
-//get users by email id
-app.get("/user",async(req,res)=>{
-    const userEmail = req.body.emailId;
-    try{
-        
-        const users = await User.find({emailId:userEmail});
-        if(users.length===0){
-            throw new Error(JSON.stringify({message:'ERROR :invalid credentials'}));  
-        }
-        else{
-            res.send(users);
-        }
-        
-    }catch(err){
-        console.log(err);
-        res.status(400).send(  err.message);
-    }
-});
-
-//delete user by id
-//edit this function correctly for showing custom message for incorrect id
-app.delete("/user",async(req,res)=>{
-    const userId = req.body._id;
-    try{
-        
-        const user = await User.findByIdAndDelete(userId);
-        if(!user){
-            throw new Error(JSON.stringify({message:'invalid credentials'})); 
-        }
-        else{
-            res.send(JSON.stringify({message:"user deleted succesfully"}));
-        }
-        
-    }catch(err){
-        res.status(400).send(
-            JSON.stringify({message:"ERROR : "}) + err.message
-        );
-    }
-});
-
-//update user by email
-// app.patch("/user/email",async(req,res)=>{
-
-//     const data = req.body;
-//     const userEmail = req.body.emailId;
 //     try{
-        
-//         let user= await User.updateOne({emailId:userEmail},data,{
-//             runValidators:true,
-//         });
-//         if(user.length===0){
-//             throw new Error(JSON.stringify({message:'invalid credentials'}));
+//         const users = await User.find({});
+//         if(users.length===0){
+//             throw new Error(JSON.stringify({message:'ERROR :users does not exist'}));
 //         }
 //         else{
-//             console.log(user);
-//             res.send(JSON.stringify({message:'user updated succesfully'}));
-            
+//             res.send(users);
 //         }
         
 //     }catch(err){
-//         res.status(400).send(JSON.stringify({message:'user updation failed'}) + err.message);
+//         console.log(err);
+//         res.status(400).send(err.message);
 //     }
 // });
 
-//update user by id
-app.patch("/user/:userId",async(req,res)=>{
-    const data = req.body;
-    const userId = req.params?.userId;
-        
-    try{
-        const ALLOWED_UPDATES =[
-         "photoUrl","about","gender","interest","skills","password","age"
-        ];
-        const isUpdateAllowed = Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k));
-        if(!isUpdateAllowed){
-            throw new Error(JSON.stringify({message:'update not allowed'}));
-        }
-        else{
-            const user = await User.findByIdAndUpdate 
-        ({_id : userId } , data,{
-            returnDocument:"after",
-            runValidators:true,
-        }); 
-       
-        // console.log(user);
-        if(!user){
-            throw new Error(JSON.stringify({message:'invalid credentials'}));
-        }
-        else{
-            res.send(JSON.stringify({message:'user updated succesfully'}));
-        }
-       
-        }
+// //get user by id
+// app.get("/user/:id",userAuth,async(req,res)=>{
+//     const id = req.params?.id;
+//   try{
+//         const user = await User.findById(id);
+//         if(!user){
+//             throw new Error(JSON.stringify({message:'ERROR :invalid credentials'})); 
+//         }
+//         else{
+//             res.send(user);
+//         }
+//     }catch(err){
+//         console.log(err);
+//         res.status(400).send(err.message);
+//     }
+// });
 
+// //get users by email id
+// app.get("/user",userAuth,async(req,res)=>{
+//     const userEmail = req.body.emailId;
+//     try{
         
-    }catch(err){
-        res.status(400).send(JSON.stringify({message:'user updation failed'}) + err.message);
-    }
-});
+//         const users = await User.find({emailId:userEmail});
+//         if(users.length===0){
+//             throw new Error(JSON.stringify({message:'ERROR :invalid credentials'}));  
+//         }
+//         else{
+//             res.send(users);
+//         }
+        
+//     }catch(err){
+//         console.log(err);
+//         res.status(400).send(  err.message);
+//     }
+// });
+
+// //delete user by id
+// //edit this function correctly for showing custom message for incorrect id
+// app.delete("/user",userAuth,async(req,res)=>{
+//     const userId = req.body._id;
+//     try{
+        
+//         const user = await User.findByIdAndDelete(userId);
+//         if(!user){
+//             throw new Error(JSON.stringify({message:'invalid credentials'})); 
+//         }
+//         else{
+//             res.send(JSON.stringify({message:"user deleted succesfully"}));
+//         }
+        
+//     }catch(err){
+//         res.status(400).send(
+//             JSON.stringify({message:"ERROR : "}) + err.message
+//         );
+//     }
+// });
+
+// //update user by email
+// // app.patch("/user/email",userAuth,async(req,res)=>{
+
+// //     const data = req.body;
+// //     const userEmail = req.body.emailId;
+// //     try{
+        
+// //         let user= await User.updateOne({emailId:userEmail},data,{
+// //             runValidators:true,
+// //         });
+// //         if(user.length===0){
+// //             throw new Error(JSON.stringify({message:'invalid credentials'}));
+// //         }
+// //         else{
+// //             console.log(user);
+// //             res.send(JSON.stringify({message:'user updated succesfully'}));
+            
+// //         }
+        
+// //     }catch(err){
+// //         res.status(400).send(JSON.stringify({message:'user updation failed'}) + err.message);
+// //     }
+// // });
+
+// //update user by id
+// app.patch("/user/:userId",userAuth,async(req,res)=>{
+//     // const data = req.body;
+//     const userId = req.params?.userId;
+//     const {photoUrl , about , gender , interest , skills , password , age} = req.body    
+//     try{
+//         // const ALLOWED_UPDATES =[
+//         //  "photoUrl","about","gender","interest","skills","password","age"
+//         // ];
+//         // const isUpdateAllowed = Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k));
+//         // if(!isUpdateAllowed){
+//         //     throw new Error(JSON.stringify({message:'update not allowed'}));
+//         // }
+//         // else{
+//         //now code will not show error for extra unwanted fields but ignore them
+//         //thus making app user friendly
+//             const passwordHash =await  bcrypt.hash(password , 10);
+//             const user = await User.findByIdAndUpdate 
+//         ({_id : userId } ,
+//              {
+//                 photoUrl : photoUrl ,
+//                 about: about ,
+//                 gender: gender ,
+//                 interest: interest , 
+//                 skills: skills ,
+//                 password : passwordHash, 
+//                 age: age  
+//              },
+//              {
+//             returnDocument:"after",
+//             runValidators:true,
+//         }); 
+       
+//         // console.log(user);
+//         if(!user){
+//             throw new Error(JSON.stringify({message:'invalid credentials'}));
+//         }
+//         else{
+//             res.send(JSON.stringify({message:'user updated succesfully'}));
+//         }   
+//     }catch(err){
+//         res.status(400).send(err.message);
+//     }
+// });
 
 
 //connection to devTinder database
