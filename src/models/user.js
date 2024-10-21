@@ -1,10 +1,11 @@
 
 const mongoose = require("mongoose");
 const validator = require('validator');
-const joi = require('joi');
-const userValidation= require('../validations/userValidation');
-const userSchema = new mongoose.Schema(
-    {
+const userValidation= require('../utils/userValidation');
+
+// userSchema definition
+
+const userSchema = new mongoose.Schema({
     firstName :{
         type: String,
         required:true,
@@ -19,19 +20,23 @@ const userSchema = new mongoose.Schema(
         type:String,
         required:true,
         unique:true,
-        validate: {
-            validator: function (username) {
-                try {
+        validate(){
                     // Validate the username using the Joi validation function
-                    return userValidation.validateUsername(username);
-                } catch (error) {
-                    // Return false if the username is invalid
-                    return false;
-                }
-            },
-            message: 'Invalid username. It must be 8-25 characters long and contain only letters and numbers.',
-        },
-    
+                    if( ! userValidation.validateUsername(username)){
+                        throw new Error (
+                            JSON.stringify({ 
+                                "message": " ERROR : invalid credentials"
+                        }));
+                    }
+            // Validate the username using the Joi validation function
+            //  else if (! userValidation.validateUsername(username)){
+            //     throw new Error (
+            //         JSON.stringify({ 
+            //             "message": " ERROR : invalid credentials"
+            //         }));
+            //  }
+                
+        }
     },
     emailId:{ 
         type:String,
@@ -42,7 +47,10 @@ const userSchema = new mongoose.Schema(
         maxLength:50,
         validate(value){
             if(!validator.isEmail(value)){
-                throw new Error ("enter a valid email");
+                throw new Error (
+                    JSON.stringify({ 
+                        "message": " ERROR : invalid credentials"
+                    }));
             }
         }
         
@@ -51,7 +59,7 @@ const userSchema = new mongoose.Schema(
         type:String,
         required:true,
         minLength:8,
-        maxLength:50,
+        maxLength:100,
         validate(value){
             if(!validator.isStrongPassword(value)){
                 throw new Error ("Enter a strong password");
@@ -123,12 +131,13 @@ const userSchema = new mongoose.Schema(
          }
     }
 },
+//timestamp for creation and updation of record
 {
     timestamps: true,
    }
 );
 
-
+//using schema to create user model
 const User=mongoose.model("User",userSchema);
 
 module.exports= User;

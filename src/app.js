@@ -5,29 +5,83 @@
 const express = require('express');
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {validateUser} = require("./utils/validation");
+const bcrypt = require('bcrypt');
 const app = express();
 
 app.use(express.json());
 //user signup api 
 app.post("/signup",async(req,res)=>{
-    //creating a new instance of user model
-    const user = new User(req.body);
+
  try{
+   
+//validation of data
+
+  validateUser(req);
+
+ //encrypt the password
+ const data = {firstName , lastName , username ,emailId , password , age , gender , photoUrl ,about , skills , interest
+  } = req.body
+
+ const passwordHash =await  bcrypt.hash(password , 10);
+console.log(passwordHash);
+    //save the data into users collection
+    //creating a new instance of user model
+    
+    const user = new User({
+        firstName ,
+        lastName , 
+        username ,
+        emailId ,
+        password:passwordHash , 
+        age , 
+        gender , 
+        photoUrl ,
+        about , 
+        skills , 
+        interest
+        }
+    );
+
     await user.save();
-    res.send("user added succesfully");
+    res.send(JSON.stringify({message:'user added succesfully'}));
  }catch(err){
     console.log(err);
-    res.status(400).send(err);
+    res.status(400).send(err.message);
  }
 });
 
+
+//login api
+app.post("/login",async(req,res)=>{
+try{
+    const{emailId , password}= req.body;
+
+   const user = await User.findOne({emailId : emailId})  ;
+if(!user){
+    throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
+}
+const isPasswordValid = await bcrypt.compare(password, user.password);
+
+if(!isPasswordValid){
+    throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
+}
+else{
+    console.log("user login succesfully!!");
+    res.send(user);
+}
+}catch(err){
+    console.log(err);
+    res.status(400).send(err.message);
+}
+});
 //feed API - get/feed - get all users from the databse
 app.get("/feed",async(req,res)=>{
    
     try{
         const users = await User.find({});
         if(users.length===0){
-          res.status(404).send("user not found");  
+            throw new Error(JSON.stringify({message:'ERROR :users does not exist'}));
         }
         else{
             res.send(users);
@@ -35,24 +89,24 @@ app.get("/feed",async(req,res)=>{
         
     }catch(err){
         console.log(err);
-        res.status(400).send("something went wrong");
+        res.status(400).send(err.message);
     }
 });
 
 //get user by id
-app.get("/id",async(req,res)=>{
-    const id = req.body._id;
+app.get("/user/:id",async(req,res)=>{
+    const id = req.params?.id;
   try{
         const user = await User.findById(id);
         if(!user){
-            res.status(404).send("user not found")
+            throw new Error(JSON.stringify({message:'ERROR :invalid credentials'})); 
         }
         else{
             res.send(user);
         }
     }catch(err){
         console.log(err);
-        res.status(400).send("something went wrong");
+        res.status(400).send(err.message);
     }
 });
 
@@ -63,7 +117,7 @@ app.get("/user",async(req,res)=>{
         
         const users = await User.find({emailId:userEmail});
         if(users.length===0){
-          res.status(404).send("user not found");  
+            throw new Error(JSON.stringify({message:'ERROR :invalid credentials'}));  
         }
         else{
             res.send(users);
@@ -71,26 +125,28 @@ app.get("/user",async(req,res)=>{
         
     }catch(err){
         console.log(err);
-        res.status(400).send("something went wrong");
+        res.status(400).send(  err.message);
     }
 });
 
 //delete user by id
-
+//edit this function correctly for showing custom message for incorrect id
 app.delete("/user",async(req,res)=>{
     const userId = req.body._id;
     try{
         
         const user = await User.findByIdAndDelete(userId);
-        if(user.length===0){
-          res.status(404).send("user does not exist");  
+        if(!user){
+            throw new Error(JSON.stringify({message:'invalid credentials'})); 
         }
         else{
-            res.send("user deleted succesfully");
+            res.send(JSON.stringify({message:"user deleted succesfully"}));
         }
         
     }catch(err){
-        res.status(400).send("something went wrong");
+        res.status(400).send(
+            JSON.stringify({message:"ERROR : "}) + err.message
+        );
     }
 });
 
@@ -105,15 +161,16 @@ app.delete("/user",async(req,res)=>{
 //             runValidators:true,
 //         });
 //         if(user.length===0){
-//           res.status(404).send("user does not exist");  
+//             throw new Error(JSON.stringify({message:'invalid credentials'}));
 //         }
 //         else{
 //             console.log(user);
-//             res.send("user updated succesfully");
+//             res.send(JSON.stringify({message:'user updated succesfully'}));
+            
 //         }
         
 //     }catch(err){
-//         res.status(400).send("Update data failed" + err.message);
+//         res.status(400).send(JSON.stringify({message:'user updation failed'}) + err.message);
 //     }
 // });
 
@@ -128,7 +185,7 @@ app.patch("/user/:userId",async(req,res)=>{
         ];
         const isUpdateAllowed = Object.keys(data).every((k)=>ALLOWED_UPDATES.includes(k));
         if(!isUpdateAllowed){
-            throw new Error("update not allowed");
+            throw new Error(JSON.stringify({message:'update not allowed'}));
         }
         else{
             const user = await User.findByIdAndUpdate 
@@ -137,13 +194,19 @@ app.patch("/user/:userId",async(req,res)=>{
             runValidators:true,
         }); 
        
-        console.log(user);
-        res.send("user updated succesfully");
+        // console.log(user);
+        if(!user){
+            throw new Error(JSON.stringify({message:'invalid credentials'}));
+        }
+        else{
+            res.send(JSON.stringify({message:'user updated succesfully'}));
+        }
+       
         }
 
         
     }catch(err){
-        res.status(400).send("user updation failed- " + err.message);
+        res.status(400).send(JSON.stringify({message:'user updation failed'}) + err.message);
     }
 });
 

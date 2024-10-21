@@ -2,15 +2,13 @@
 const Joi = require('joi');
 
 
-
-
 // Validation function using Joi for username
 const validateUsername = (username) => {
     // Define Joi validation for the username field
     const usernameSchema = Joi.string().alphanum().min(8).max(25).required();
     const { error } = usernameSchema.validate(username);
     if (error) {
-        throw new Error('Username must be 8-25 characters long and contain only letters and numbers.');
+        throw new Error(JSON.stringify({message:'Username must be 8-25 characters long and contain only letters and numbers.'}));
     }
 
     return true;
@@ -48,7 +46,7 @@ const validateInterest=(interestArray)=>{
     console.log(errors.length);
     if(errors.length>0){
         console.log(errors.length);
-        throw new Error(errors.join(' '));
+        throw new Error(JSON.stringify({message:errors.join(' , ')}));
     }
     return true;
 };
