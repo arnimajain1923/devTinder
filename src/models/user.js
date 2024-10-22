@@ -145,6 +145,7 @@ userSchema.methods.getJWT = async function(){
     const user = this;
 //create a JWT token
 const token = await jwt.sign({_id:user._id},"develop@js#node" , {expiresIn: "7d"});
+return token;
 }
 
 //password verification for user login
@@ -153,6 +154,7 @@ userSchema.methods.PasswordVerification = async function(passwordInput){
     const user = this;
     const passwordHash= user.password;
 const isPasswordValid = await bcrypt.compare(passwordInput, passwordHash);
+return isPasswordValid ;
 }
 
 //using schema to create user model

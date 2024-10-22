@@ -8,7 +8,7 @@ const User = require("./models/user");
 const {validateUser} = require("./utils/validation");
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 const { userAuth }= require("./middlewares/auth");
 
 const morgan = require('morgan');
@@ -60,7 +60,7 @@ console.log(passwordHash);
 
 
 //login api
-app.post("/login",async(req,res)=>{
+app.post("/login",async(req,res)=>{  
 try{
     const{emailId , password}= req.body;
 
@@ -71,7 +71,7 @@ if(!user){
 const isPasswordValid = await user.PasswordVerification(password);
 
 if(!isPasswordValid){
-    throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
+    throw new Error(JSON.stringify({message:"ERROR!!! invalid creds"}));
 }
 else{
     //create token from schema helper /util function
@@ -96,11 +96,11 @@ app.get("/profile", userAuth ,async (req,res)=>{
     
     try
     {
-        const user = req.user;
-        if(!user){
+        // req.user = let user;
+        if(!req.user){
             throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
         }
-        res.send(user);
+        res.send(req.user);
     }catch(err){
         console.log(err);
         res.status(400).send(err.message);
