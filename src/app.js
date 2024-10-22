@@ -4,126 +4,29 @@
 //imports
 const express = require('express');
 const connectDB = require("./config/database");
-const User = require("./models/user");
-const {validateUser} = require("./utils/validation");
-const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 // const jwt = require('jsonwebtoken');
-const { userAuth }= require("./middlewares/auth");
-
+const authRouter = require('./routes/auth');
+const profileRouter = require('./routes/profile');
+const requestRouter = require('./routes/request');
 const morgan = require('morgan');
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
+
+//logger for development , debugging ,and console status of apis etc
 app.use(morgan('dev'));
-//user signup api 
-app.post("/signup",async(req,res)=>{
 
- try{
-   
-//validation of data
+//user authentication routes
+app.use("/" , authRouter);
 
-  validateUser(req);
-
- //encrypt the password
- const data = {firstName , lastName , username ,emailId , password , age , gender , photoUrl ,about , skills , interest
-  } = req.body
-
- const passwordHash =await  bcrypt.hash(password , 10);
-console.log(passwordHash);
-    //save the data into users collection
-    //creating a new instance of user model
-    
-    const user = new User({
-        firstName ,
-        lastName , 
-        username ,
-        emailId ,
-        password:passwordHash , 
-        age , 
-        gender , 
-        photoUrl ,
-        about , 
-        skills , 
-        interest
-        }
-    );
-
-    await user.save();
-    res.send(JSON.stringify({message:'user added succesfully'}));
- }catch(err){
-    console.log(err);
-    res.status(400).send(err.message);
- }
-});
+//user profile related routes
+app.use("/", profileRouter);
 
 
-//login api
-app.post("/login",async(req,res)=>{  
-try{
-    const{emailId , password}= req.body;
-
-   const user = await User.findOne({emailId : emailId})  ;
-if(!user){
-    throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
-}
-const isPasswordValid = await user.PasswordVerification(password);
-
-if(!isPasswordValid){
-    throw new Error(JSON.stringify({message:"ERROR!!! invalid creds"}));
-}
-else{
-    //create token from schema helper /util function
-    const token = await user.getJWT();
-
-    //  add the token to cookie and send the response back to user
-    const cookies =  res.cookie("token",token ,{ maxAge: 30*24*60*60*1000, httpOnly: true  });
-    //cookie expires in 30 days
-    // console.log(token);
-    console.log("user login succesfully!!");
-   
-    res.send(user);
-}
-}catch(err){
-    console.log(err);
-    res.status(400).send(err.message);
-}
-});
-
-//profile api - get user profile only
-app.get("/profile", userAuth ,async (req,res)=>{
-    
-    try
-    {
-        // req.user = let user;
-        if(!req.user){
-            throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
-        }
-        res.send(req.user);
-    }catch(err){
-        console.log(err);
-        res.status(400).send(err.message);
-    }
-
-});
-
-//send Request api
-app.post("/sendRequest", userAuth , async(req,res)=>{
-    try{
-         const user = req.user;
-        if(!user){
-            throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
-        }
-        res.send(user.firstName +" sent a new connection request");
-        }
-    catch(err){
-        console.log(err);
-        res.status(400).send(err.message);
-        }
-
-    
-})
+//send request router
+app.use("/", requestRouter);
 
 
 // //feed API - get/feed - get all users from the databse
