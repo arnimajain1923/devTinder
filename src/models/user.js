@@ -22,21 +22,17 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true,
         unique:true,
-        validate(){
+        validate:{
+            validator: function(value) {
                     // Validate the username using the Joi validation function
-                    if( ! userValidation.validateUsername(username)){
+                    if (!value) return true;
+                    if( ! userValidation.validateUsername(value)){
                         throw new Error (
                             JSON.stringify({ 
                                 "message": " ERROR : invalid credentials"
                         }));
                     }
-            // Validate the username using the Joi validation function
-            //  else if (! userValidation.validateUsername(username)){
-            //     throw new Error (
-            //         JSON.stringify({ 
-            //             "message": " ERROR : invalid credentials"
-            //         }));
-            //  }
+            }
                 
         }
     },
