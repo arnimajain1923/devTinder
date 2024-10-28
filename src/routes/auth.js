@@ -71,7 +71,7 @@ authRouter.post("/login",async(req,res)=>{
        // console.log(token);
        console.log("user login succesfully!!");
       
-       res.send(user);
+       res.json(user);
    }
    }catch(err){
        console.log(err);
@@ -81,8 +81,7 @@ authRouter.post("/login",async(req,res)=>{
 
    //logout api
 authRouter.post("/logout", async(req,res)=>{
-    res.clearCookie("token");
-    res.send({"message":"user logout successfully"});
+    res.clearCookie("token").json({"message":"user logout successfully"});
 
 });
 module.exports = authRouter;

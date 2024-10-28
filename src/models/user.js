@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const userValidation= require('../utils/userValidation');
+const validation= require('../utils/validation');
 
 // userSchema definition
 
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
             validator: function(value) {
                     // Validate the username using the Joi validation function
                     if (!value) return true;
-                    if( ! userValidation.validateUsername(value)){
+                    if( !validation.validateUserName(value)){
                         throw new Error (
                             JSON.stringify({ 
                                 "message": " ERROR : invalid credentials"
@@ -98,7 +98,7 @@ const userSchema = new mongoose.Schema({
          validate:{ 
             validator: function(skills){
                 try {
-                    const validationResult = userValidation.validateArray(skills, 5, 'skills');
+                    const validationResult = validation.validateArray(skills, 5, 'skills');
                     let result = validationResult === true ? true : validationResult;
                     if(result!==true){
                         throw new Error(validationResult);
@@ -115,7 +115,7 @@ const userSchema = new mongoose.Schema({
         validate:{
             validator: function(interestArray){
                 try {
-                    const validationResult = userValidation.validateInterest(interestArray);
+                    const validationResult = validation.validateInterest(interestArray);
                     // let result = validationResult === true ? true : validationResult;
                     if(validationResult!==true){
                         throw new Error(validationResult);

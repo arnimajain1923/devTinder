@@ -24,7 +24,6 @@ app.use("/" , authRouter);
 //user profile related routes
 app.use("/", profileRouter);
 
-
 //send request router
 app.use("/", requestRouter);
 
@@ -83,26 +82,6 @@ app.use("/", requestRouter);
 //     }
 // });
 
-// //delete user by id
-// //edit this function correctly for showing custom message for incorrect id
-// app.delete("/user",userAuth,async(req,res)=>{
-//     const userId = req.body._id;
-//     try{
-        
-//         const user = await User.findByIdAndDelete(userId);
-//         if(!user){
-//             throw new Error(JSON.stringify({message:'invalid credentials'})); 
-//         }
-//         else{
-//             res.send(JSON.stringify({message:"user deleted succesfully"}));
-//         }
-        
-//     }catch(err){
-//         res.status(400).send(
-//             JSON.stringify({message:"ERROR : "}) + err.message
-//         );
-//     }
-// });
 
 
 

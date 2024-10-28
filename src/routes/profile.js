@@ -2,6 +2,15 @@ const express = require('express');
 const { userAuth }= require("../middlewares/auth");
 const User = require("../models/user");
 const bcrypt = require('bcrypt');
+// const validator = require('validator');
+const { validatePassword,
+    validateInterest,
+    validateArray,
+    validateGender,
+    validateAbout,
+    validateAge,
+validatePhotoUrl} = require('../utils/validation');
+const {} = require('../utils/userValidation');
 const profileRouter = express.Router();
 
 
@@ -13,11 +22,11 @@ profileRouter.get("/profile/view", userAuth ,async (req,res)=>{
     {
         // req.user = let user;
         if(!req.user){
-            throw new Error(JSON.stringify({message:"ERROR!!! invalid user"}));
+            throw new Error.json({"message":"ERROR!!! invalid user"});
         }
-        res.send(req.user);
+        res.json(req.user);
     }catch(err){
-        res.status(400).send(err.message);
+        res.status(400).json(err.message);
     }
 
 });
@@ -28,28 +37,42 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     try {
         const Updates = Object.keys(req.body); // Get the keys from the request body
         const ALLOWED_UPDATES = [
-            "photoUrl", "about", "gender", "interest", "skills", "password", "age"
+            "photoUrl", "about", "gender", "interest", "skills", "age"
         ];
+        //validation for each field during update at api level
+        if(Updates.includes('photoUrl')){
+            validatePhotoUrl(req.body.photoUrl);
+        };
+        if(Updates.includes('about')){
+            validateAbout(req.body.about);
+        };
+        if(Updates.includes('gender')){
+            validateGender(req.body.gender);
+        };
+        if(Updates.includes('interest')){
+            validateInterest(req.body.interest);
+        };
+        if(Updates.includes('skills')){
+            validateArray(req.body.skills ,5, 'skills');
+        };
+        if(Updates.includes('age')){
+            validateAge(req.body.age);
+        };
         const filteredUpdates = Updates.filter(update => ALLOWED_UPDATES.includes(update));
-
         let user = req.user;
-        console.log('User before update:', user);
-
+        // console.log('User before update:', user);
         // Apply the allowed updates to the user object
+
         filteredUpdates.forEach(key => {
             user[key] = req.body[key];
         });
-
         await user.save();
+        // console.log('User after update:', user);
 
-        console.log('User after update:', user);
-
-        // Respond with success
-        res.send({"message": 'User updated successfully', "user": user});
+        res.json({"message": 'User updated successfully', "user": user});
     } catch (err) {
-        // Log the error and respond with a proper status
         console.error('Error updating user:', err);
-        res.status(400).send({error: err.message});
+        res.status(400).json({error: err.message});
     }
 });
 
@@ -59,19 +82,21 @@ profileRouter.patch("/profile/password/change", userAuth, async (req, res) =>{
     let {password , _id}= req.user;
     // let user = req.user;
     const{oldPassword , newPassword , confirmPassword} = req.body;
-    const checkOldPassword  = bcrypt.compare(oldPassword ,password );
-    console.log(password);
+    const checkOldPassword  =await bcrypt.compare(oldPassword , password );
     try{
         if(checkOldPassword){
-            if(newPassword===confirmPassword){
-                const newPasswordHash =  await  bcrypt.hash(newPassword , 10);
-                await User.findByIdAndUpdate(_id, { password: newPasswordHash}, { new: true });
+            if(newPassword!==confirmPassword){
+                throw new Error(JSON.stringify({"message":"ERROR!!! newPassword and confirmPassword does not match . Try again !!!"}));
             }
-            else{
-                throw new Error({"message":"ERROR!!! invalid user"});
-            }
-        };
-        res.send({"message":"password changed succesfully"});
+            validatePassword(newPassword);
+            const newPasswordHash =  await  bcrypt.hash(newPassword , 10);
+            const user = await User.findByIdAndUpdate(_id, { password: newPasswordHash},{returnDocument:'after'});
+            console.log(user);
+        }else{
+            throw new Error(JSON.stringify({"message":"ERROR!!! invalid user"}));
+        }
+       
+        res.json({"message":"password changed succesfully"});
     }catch(err){
         res.status(400).send(err.message);
     }
@@ -83,19 +108,26 @@ profileRouter.delete("/profile/delete",userAuth,async(req,res)=>{
     
     try{
         
-        const {_id} = req.user;
+        const {_id , password} = req.user;
+        const{enterPassword} = req.body;
+        if(!enterPassword){
+            throw new Error(JSON.stringify({"message":'please enterPassword to confirm delete!!'}))
+        }
+        const checkPassword  =await bcrypt.compare(enterPassword , password );
+        if(checkPassword){
         const deleteUser = await User.findByIdAndDelete(_id);
         if(!deleteUser){
-            throw new Error({"message":'invalid credentials'}); 
+            throw new Error(JSON.stringify({"message":'invalid credentials'})); 
         }
         else{
-            res.send({"message":"user deleted succesfully"});
+            res.json({"message":"user deleted succesfully"});
+        };
+        }else{
+            throw new Error(JSON.stringify({"message":'invalid credentials'}));
         }
         
     }catch(err){
-        res.status(400).send(
-            ({message:"ERROR : "}) , err.message
-        );
+        res.status(400).send( err.message);
     }
 });
 
