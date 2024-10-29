@@ -22,7 +22,7 @@ const userAuth = async (req, res , next)=>{
         }
     else{
               req.user = user;
-            console.log(req.user);
+            //console.log(req.user);
             next();
             //move to request handler
         }

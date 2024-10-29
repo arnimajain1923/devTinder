@@ -94,7 +94,7 @@ const validateEmailId =(emailId)=>{
 const validatePassword =(password)=>{
 
     if(!password){
-        throw new Error(JSON.stringify({"message":'ERROR : password is required'}));
+        throw new Error(JSON.stringify({message:'ERROR : password is required'}));
     };
 
     if(!validator.isStrongPassword(password)){
@@ -135,7 +135,7 @@ const validateAge =(age)=>{
     if(!age){
         throw new Error(JSON.stringify({message:'ERROR : age can not be empty'}));
     }
-    if(age>18 || age>150){
+    if(age<18 || age>150){
         throw new Error(JSON.stringify({message:'ERROR : you are not allowed to use the app due to age restriction'}));
     }
 }
@@ -164,8 +164,13 @@ const validateArray = (array , maxLength ,fieldName)=>{
 
 //validate interest field of schema
 const validateInterest=(interestArray)=>{
-    let errors = validateArray(interestArray,5,'interest');
+    const arrayValidationResult = validateArray(interestArray, 5, 'interest');
+    let errors = [];
 
+    // Check if validateArray returned an array of errors
+    if (arrayValidationResult !== true) {
+        errors = errors.concat(arrayValidationResult); // Add any errors from validateArray
+    }
     const validInterests = [
         "coding partners", "networking", "open-source", "learning", "mentorship",
         "side projects", "job", "freelance", "hackathons", "code review",
@@ -177,7 +182,7 @@ const validateInterest=(interestArray)=>{
         errors.push(`The interest "${interest}" you mentioned is not appropriate`); 
         };
     });
-
+    
     console.log(errors.length);
     if(errors.length>0){
         console.log(errors.length);

@@ -20,7 +20,7 @@ authRouter.post("/signup",async(req,res)=>{
      } = req.body
    
     const passwordHash =await  bcrypt.hash(password , 10);
-   console.log(passwordHash);
+//    console.log(passwordHash);
        //save the data into users collection
        //creating a new instance of user model
        
@@ -69,12 +69,12 @@ authRouter.post("/login",async(req,res)=>{
        const cookies =  res.cookie("token",token ,{ maxAge: 24*60*60*1000, httpOnly: true  });
        //cookie expires in  1 day
        // console.log(token);
-       console.log("user login succesfully!!");
+    //    console.log("user login succesfully!!");
       
        res.json(user);
    }
    }catch(err){
-       console.log(err);
+    //    console.log(err);
        res.status(400).send(err.message);
    }
    });

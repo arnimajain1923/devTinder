@@ -2,7 +2,6 @@ const express = require('express');
 const { userAuth }= require("../middlewares/auth");
 const User = require("../models/user");
 const bcrypt = require('bcrypt');
-// const validator = require('validator');
 const { validatePassword,
     validateInterest,
     validateArray,
@@ -71,7 +70,7 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
 
         res.json({"message": 'User updated successfully', "user": user});
     } catch (err) {
-        console.error('Error updating user:', err);
+        // console.error('Error updating user:', err);
         res.status(400).json({error: err.message});
     }
 });
@@ -91,7 +90,7 @@ profileRouter.patch("/profile/password/change", userAuth, async (req, res) =>{
             validatePassword(newPassword);
             const newPasswordHash =  await  bcrypt.hash(newPassword , 10);
             const user = await User.findByIdAndUpdate(_id, { password: newPasswordHash},{returnDocument:'after'});
-            console.log(user);
+            // console.log(user);
         }else{
             throw new Error(JSON.stringify({"message":"ERROR!!! invalid user"}));
         }

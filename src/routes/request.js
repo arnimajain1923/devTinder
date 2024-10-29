@@ -29,7 +29,7 @@ requestRouter.post("/send/request/:status/:UserId", userAuth , async(req,res)=>{
             };
 
             const toUser = await User.findById(ToUserId);
-            console.log(toUser);
+            // console.log(toUser);
         
             if(!toUser){
                 return res.status(400).json({message:"ERROR!!! invalid user"});
@@ -39,7 +39,7 @@ requestRouter.post("/send/request/:status/:UserId", userAuth , async(req,res)=>{
                 toUserId :ToUserId ,
                 status :Status});
             await Request.save();
-            console.log(Request);
+            // console.log(Request);
 
             if(Status ==="interested"){
                 res.json({message:`${firstName} is interested in ${toUser.firstName}`});
@@ -73,14 +73,14 @@ requestRouter.post("/request/review/:status/:requestId", userAuth , async(req, r
             toUserId :loggedInUser._id,
             status:"interested"
         });
-        console.log(existingRequest);
+        // console.log(existingRequest);
         if(!existingRequest){
             return res.status(400).json({"message":"request does not exist"});
         };
         existingRequest.status = status ;
         const reviewedRequest = await existingRequest.save() ;
-        console.log(reviewedRequest);
-        res.json({"message":`requested ${status} succesfully`});
+        // console.log(reviewedRequest);
+        res.json({"message":`request ${status} succesfully`});
     }catch(err){
         res.json({"message":err.message});
     };

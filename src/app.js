@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/request');
+const userRouter = require('./routes/user');
 const morgan = require('morgan');
 const app = express();
 
@@ -27,24 +28,12 @@ app.use("/", profileRouter);
 //send request router
 app.use("/", requestRouter);
 
+//get user requests and connections
 
-// //feed API - get/feed - get all users from the databse
-// app.get("/feed", userAuth,async(req,res)=>{
-   
-//     try{
-//         const users = await User.find({});
-//         if(users.length===0){
-//             throw new Error(JSON.stringify({message:'ERROR :users does not exist'}));
-//         }
-//         else{
-//             res.send(users);
-//         }
-        
-//     }catch(err){
-//         console.log(err);
-//         res.status(400).send(err.message);
-//     }
-// });
+app.use("/" , userRouter);
+
+
+
 
 // //get user by id
 // app.get("/user/:id",userAuth,async(req,res)=>{
