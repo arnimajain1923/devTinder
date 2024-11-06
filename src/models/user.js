@@ -74,14 +74,22 @@ const userSchema = new mongoose.Schema({
     gender:{
         type:String,
         validate(value){
-            if(!["male","female","others"].includes(value)){
+            if(!["male","female","other"].includes(value)){
               throw new Error("Gender data is not valid");
             }
         }
     },
-    photoUrl:{
+    avatar:{
         type:String,
-        default:"https://th.bing.com/th/id/OIP.sP_Fy-jUeB7gAQ9ovXho_wHaF7?w=212&h=180&c=7&r=0&o=5&pid=1.7",
+        // required:true
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error ("enter a valid image url");
+            }
+        }
+    },
+    coverImage:{
+        type:String,
         validate(value){
             if(!validator.isURL(value)){
                 throw new Error ("enter a valid image url");

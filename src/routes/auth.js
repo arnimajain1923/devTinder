@@ -2,12 +2,43 @@ const express = require('express');
 const User = require("../models/user");
 const {validateUser} = require("../utils/validation");
 const bcrypt = require('bcrypt');
-
-
 const authRouter = express.Router();
+//const uploadFile= require("../middlewares/multer.middleware");
+const multer = require('multer');
+const path = require('path');
+const {uploadOnCloudinary} = require('../utils/cloudinary');
 
-//user signup api 
-authRouter.post("/signup",async(req,res)=>{
+const storage = multer.diskStorage({
+    destination:function(req , file , cb){
+        const location = path.join(__dirname, "../public/temp");
+        return cb(null , location);
+    },
+    filename:function(req , file , cb){
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, file.originalname + '-' + uniqueSuffix)
+    
+    }
+})
+const uploadFile = multer({storage});
+
+//route to display signup page
+authRouter.get('/signup', (req, res) => {
+    res.render('signup');
+  });
+
+//route to handle form submission
+authRouter.post("/signup",
+    uploadFile.fields([
+        {
+            name : "avatar",
+            maxCount :1
+        },
+        {
+             name: "coverImage",
+             maxCount: 1  
+        }
+    ]),
+    async(req,res)=>{
 
     try{
       
@@ -16,23 +47,38 @@ authRouter.post("/signup",async(req,res)=>{
      validateUser(req);
    
     //encrypt the password
-    const data = {firstName , lastName , username ,emailId , password , age , gender , photoUrl ,about , skills , interest
+    const{firstName , lastName , username ,emailId , password , age , gender , about , skills , interest
      } = req.body
-   
+
+     const avatarLocalPath = req.files?.avatar[0].path;
+     const coverImageLocalPath = req.files?.coverImage[0].path;
+     if(!avatarLocalPath){
+        throw new Error(JSON.stringify({message:"ERROR!!! avatar required"}));
+     };
+
+     const avatar = await uploadOnCloudinary(avatarLocalPath);
+     const coverImage= await uploadOnCloudinary(coverImageLocalPath);
+
+     console.log("avatar",avatar);
+     console.log("coverImage" , coverImage);
+     if(!avatar){
+        throw new Error(JSON.stringify({message:"ERROR!!! avatar required"}));
+     }
     const passwordHash =await  bcrypt.hash(password , 10);
 //    console.log(passwordHash);
        //save the data into users collection
        //creating a new instance of user model
        
        const user = new User({
-           firstName ,
+           firstName :firstName.toLowerCase() ,
            lastName , 
-           username ,
+           username :username.toLowerCase() ,
            emailId ,
            password:passwordHash , 
            age , 
            gender , 
-           photoUrl ,
+           avatar: avatar.url? avatar.url :process.env.DEFAULT_AVATAR ,
+           coverImage:coverImage.url|| "",
            about , 
            skills , 
            interest
@@ -40,12 +86,20 @@ authRouter.post("/signup",async(req,res)=>{
        );
    
        await user.save();
-       res.send(JSON.stringify({message:'user added succesfully'}));
+        console.log(user);
+       console.log(req.file);
+       res.render('success', { firstName });
     }catch(err){
        console.log(err);
        res.status(400).send(err.message);
     }
 });
+
+
+//route to display login page
+authRouter.get('/login', (req, res) => {
+    res.render('login');
+  });
    
    //login api
 authRouter.post("/login",async(req,res)=>{  
@@ -66,12 +120,12 @@ authRouter.post("/login",async(req,res)=>{
        const token = await user.getJWT();
    
        //  add the token to cookie and send the response back to user
-       const cookies =  res.cookie("token",token ,{ maxAge: 24*60*60*1000, httpOnly: true  });
+        res.cookie("token",token ,{ maxAge: 24*60*60*1000, httpOnly: true  });
        //cookie expires in  1 day
        // console.log(token);
     //    console.log("user login succesfully!!");
-      
-       res.json(user);
+      const firstName = user.firstName;
+       res.render('success',{firstName});
    }
    }catch(err){
     //    console.log(err);

@@ -2,10 +2,11 @@
 //core application code
 
 //imports
+require('dotenv').config();
 const express = require('express');
+const path = require("path");
 const connectDB = require("./config/database");
 const cookieParser = require('cookie-parser');
-// const jwt = require('jsonwebtoken');
 const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/request');
@@ -13,8 +14,18 @@ const userRouter = require('./routes/user');
 const morgan = require('morgan');
 const app = express();
 
+const port = process.env.PORT || 3000;
+
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.urlencoded({extended: false}));
+
+
+app.set('views', path.join(__dirname, 'views'));
+// set the view engine to ejs
+app.set('view engine', 'ejs');
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 //logger for development , debugging ,and console status of apis etc
 app.use(morgan('dev'));
@@ -79,8 +90,8 @@ connectDB()
 .then(()=>{
     console.log("database connection established");
     //listening application on port
-    app.listen(3000,()=>{
-        console.log('server is running on port 3000');
+    app.listen(port,()=>{
+        console.log(`Server running on http://localhost:${port}`);
     }); 
 })
 .catch(err=>{
