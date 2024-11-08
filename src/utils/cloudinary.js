@@ -19,7 +19,7 @@ cloudinary.config({
             })
                     //file uploaded now remove from local
             fs.unlinkSync(localFilePath);
-            // console.log(response.url);
+            //  console.log(response);
             return response
             
     }catch(err){
@@ -29,4 +29,4 @@ cloudinary.config({
     }
   }
 
-  module.exports ={uploadOnCloudinary};
+  module.exports =uploadOnCloudinary;

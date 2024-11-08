@@ -1,101 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <%- include('./partials/header.ejs') %> 
+        <link rel="stylesheet" href="/styles/signup.css" >
+        <title>Signup</title>
+    </head>
+    <body id="demo">
+        <div class="form-container">
+            <h1>Signup</h1>
+            <form action="/signup" method="POST" enctype="multipart/form-data">
+                <div class="form-group" >
+                    <div class="name-container">
+                        <div>
+                            <input type="text" name="firstName" placeholder="First Name" required>
+                        </div>
+                        <div>
+                            <input type="text" name="lastName" placeholder="Last Name">
+                        </div>
+                    </div>
+                </div>   
+                <div class="form-group">  
+                    <input type="text" name="username"  placeholder="username" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="emailId" placeholder="email Id" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="password" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" min="18" max="150" name="age" placeholder="age"required>
+                </div>
+                <div class="form-group">
+                    <div class="container">
+                        <label for="gender"  style="font-size: medium ;font-weight: 300;">Gender:</label>
+                        <div class="radio-item">
+                            <input type="radio" name="gender" value="male" >
+                            <label style="font-size:medium;">Male</label>
+                        </div>
+                        <div class="radio-item">
+                        <input type="radio" name="gender" value="female"> 
+                        <label style="font-size:medium;">Female</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" name="gender" value="other"> 
+                            <label style="font-size:medium;">Other</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="imageLabelDiv">
+                        <label for="avatar" class="imageLabel">avatar:</label>
+                    </div>
+                    <div class="imageDiv">
+                        <input type="file" name="avatar"  class="profileImage">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="imageLabelDiv">
+                        <label for="coverImage" class="imageLabel">Profile Image :</label>
+                    </div>
+                    <div class="imageDiv">
+                        <input type="file" name="coverImage"  id="profileImage">
+                    </div>
+                </div>
+                <div class="form-group">  
+                    <!-- <label for="about">About:</label> -->
+                    <input type="text" name="about" placeholder=" write about yourself">
+                </div>
+                <!-- <div class="form-group">
 
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <%- include('./partials/header.ejs') %> 
-  <link rel="stylesheet" href="/styles/signup.css" >
-  <title>Signup</title>
- 
-</head>
-<body id="demo">
-    <div class="form-container" >
-  <h1>Signup</h1>
-  <form action="/signup" method="POST" enctype="multipart/form-data">
-    <div class="form-group" >
-        <div class="name-container">
-            <div>
-                <input type="text" name="firstName" placeholder="First Name" required>
-            </div>
-            <div>
-                <input type="text" name="lastName" placeholder="Last Name">
-            </div>
-        </div>
-    </div>   
-    <div class="form-group">  
-        <input type="text" name="username"  placeholder="username" required>
-    </div>
-    <div class="form-group">
-        <input type="email" name="emailId" placeholder="email Id" required>
-    </div>
-    <div class="form-group">
-        <input type="password" name="password" placeholder="password" required>
-    </div>
-    <div class="form-group">
-        <input type="number" min="18" max="150" name="age" placeholder="age"required>
-    </div>
-    <div class="form-group">
-        <div class="container">
-            <label for="gender"  style="font-size: medium ;font-weight: 300;">Gender:</label>
-            <div class="radio-item">
-                <input type="radio" name="gender" value="male" >
-                <label style="font-size:medium;">Male</label>
-            </div>
-            <div class="radio-item">
-               <input type="radio" name="gender" value="female"> 
-               <label style="font-size:medium;">Female</label>
-            </div>
-            <div class="radio-item">
-                <input type="radio" name="gender" value="other"> 
-                <label style="font-size:medium;">Other</label>
-            </div>
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="imageLabelDiv">
-            <label for="avatar" class="imageLabel">avatar:</label>
-        </div>
-        <div class="imageDiv">
-            <input type="file" name="avatar"  class="profileImage">
-        </div>
-    </div>
-    
-    <div class="form-group">
-        <div class="imageLabelDiv">
-            <label for="coverImage" class="imageLabel">Profile Image :</label>
-        </div>
-        <div class="imageDiv">
-            <input type="file" name="coverImage"  id="profileImage">
-        </div>
-    </div>
-    <div class="form-group">  
-        <!-- <label for="about">About:</label> -->
-        <input type="text" name="about" placeholder=" write about yourself">
-    </div>
-    <!-- <div class="form-group">
-
-        <label for="skills">skills:</label>
-        <input type="text" name="skills">
-        <label>
-            <input type="checkbox" name="" value="male" > Male
-        </label>
-        <label>
-            <input type="checkbox" name="gender" value="female"> Female
-        </label>
-        <label>
-            <input type="checkbox" name="gender" value="other"> Other
-        </label> 
-    </div>
-    <div class="form-group">
-    </div> -->
-    <div class="form-group">
-        <button type="submit" id="signup">Signup</button>
-    </div>
-    
-  </form>
-  <%- include('./partials/script.ejs') %> 
-
-</body>
+                    <label for="skills">skills:</label>
+                    <input type="text" name="skills">
+                    <label>
+                        <input type="checkbox" name="" value="male" > Male
+                    </label>
+                    <label>
+                        <input type="checkbox" name="gender" value="female"> Female
+                    </label>
+                    <label>
+                        <input type="checkbox" name="gender" value="other"> Other
+                    </label> 
+                </div>
+                <div class="form-group">
+                </div> -->
+                <div class="form-group">
+                    <button type="submit" id="signup">Signup</button>
+                </div>
+                
+                
+            </form>
+        </div>  
+        <%- include('./partials/script.ejs') %> 
+    </body>
 </html>

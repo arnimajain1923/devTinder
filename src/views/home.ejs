@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <%- include('./partials/header.ejs') %>
+    <title>HomePage</title>
+</head>
+<body>
+    <%- include('./partials/nav.ejs') %>
+    <%- include('./partials/home_slider.ejs') %>
+    <div class="containter mt-3" style="display: flexbox;">
+      <% blogs.forEach(blog => { %>
+        <div class="card" style="width: 18rem;">
+          <img src="<%= blog.blogImageUrl  %>" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title"><%= blog.title%></h5>
+            <p class="card-text"><%=blog.body  %></p>
+            <a href="#" class="btn btn-primary">Go somewhere</a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+      
+    <%- include('./partials/script.ejs') %>
+</body>
+</html>

@@ -7,43 +7,34 @@ const express = require('express');
 const path = require("path");
 const connectDB = require("./config/database");
 const cookieParser = require('cookie-parser');
+const morgan = require('morgan');
+//routes
 const authRouter = require('./routes/auth');
 const profileRouter = require('./routes/profile');
 const requestRouter = require('./routes/request');
 const userRouter = require('./routes/user');
-const morgan = require('morgan');
+const blogRouter = require('./routes/blog');
+const homeRouter = require('./routes/home');
 const app = express();
-
 const port = process.env.PORT || 3000;
+
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({extended: false}));
-
-
 app.set('views', path.join(__dirname, 'views'));
-// set the view engine to ejs
 app.set('view engine', 'ejs');
-
 app.use(express.static(path.join(__dirname, 'public')));
-
-//logger for development , debugging ,and console status of apis etc
 app.use(morgan('dev'));
 
-//user authentication routes
+
+
 app.use("/" , authRouter);
-
-//user profile related routes
 app.use("/", profileRouter);
-
-//send request router
 app.use("/", requestRouter);
-
-//get user requests and connections
-
 app.use("/" , userRouter);
-
-
+app.use('/' , blogRouter);
+app.use('/' , homeRouter);
 
 
 // //get user by id
@@ -81,9 +72,6 @@ app.use("/" , userRouter);
 //         res.status(400).send(  err.message);
 //     }
 // });
-
-
-
 
 //connection to devTinder database
 connectDB()

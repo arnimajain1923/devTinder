@@ -5,12 +5,12 @@ const blogSchema = new mongoose.Schema({
         type : String ,
         required: true
     },
+    blogImageUrl:{
+        type: String ,
+    },
     body:{
         type : String ,
         required: true
-    },
-    coverImageURL:{
-        type: String ,
     },
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +22,6 @@ const blogSchema = new mongoose.Schema({
     timestamps: true,
    }
 )
-const Blog=mongoose.model("blog",blogSchema);
+const Blog = mongoose.model("blog",blogSchema);
 
 module.exports= Blog;

@@ -8,7 +8,7 @@ const validation= require('../utils/validation');
 // userSchema definition
 
 const userSchema = new mongoose.Schema({
-    firstName :{
+    firstName:{
         type: String,
         required:true,
         trim:true,
@@ -65,7 +65,6 @@ const userSchema = new mongoose.Schema({
         }
 
     },
-
     age:{
         type:Number,
         min: 18,
@@ -90,11 +89,6 @@ const userSchema = new mongoose.Schema({
     },
     coverImage:{
         type:String,
-        validate(value){
-            if(!validator.isURL(value)){
-                throw new Error ("enter a valid image url");
-            }
-        }
     },
     about:{
         type:String,

@@ -7,6 +7,7 @@ const authRouter = express.Router();
 const multer = require('multer');
 const path = require('path');
 const {uploadOnCloudinary} = require('../utils/cloudinary');
+const { date } = require('joi');
 
 const storage = multer.diskStorage({
     destination:function(req , file , cb){
@@ -51,16 +52,23 @@ authRouter.post("/signup",
      } = req.body
 
      const avatarLocalPath = req.files?.avatar[0].path;
-     const coverImageLocalPath = req.files?.coverImage[0].path;
+     const coverImageLocalPath = req.files?.coverImage ? req.files.coverImage[0].path : null;
      if(!avatarLocalPath){
         throw new Error(JSON.stringify({message:"ERROR!!! avatar required"}));
      };
-
      const avatar = await uploadOnCloudinary(avatarLocalPath);
-     const coverImage= await uploadOnCloudinary(coverImageLocalPath);
 
-     console.log("avatar",avatar);
-     console.log("coverImage" , coverImage);
+    // console.log(coverImageLocalPath);
+ 
+    let coverImageUrl = "";
+     let coverImage ;
+    if (coverImageLocalPath!==null) {
+        coverImage = await uploadOnCloudinary(coverImageLocalPath);
+        coverImageUrl = coverImage.url;
+    }
+
+    //  console.log("avatar",avatar);
+    //  console.log("coverImage" , coverImage);
      if(!avatar){
         throw new Error(JSON.stringify({message:"ERROR!!! avatar required"}));
      }
@@ -78,7 +86,7 @@ authRouter.post("/signup",
            age , 
            gender , 
            avatar: avatar.url? avatar.url :process.env.DEFAULT_AVATAR ,
-           coverImage:coverImage.url|| "",
+           coverImage:coverImageUrl,
            about , 
            skills , 
            interest
@@ -86,13 +94,15 @@ authRouter.post("/signup",
        );
    
        await user.save();
-        console.log(user);
-       console.log(req.file);
-       res.render('success', { firstName });
+    //     console.log(user);
+    //    console.log(req.file);
+       res.render('home', { firstName });
     }catch(err){
        console.log(err);
        res.status(400).send(err.message);
     }
+
+
 });
 
 
@@ -125,7 +135,7 @@ authRouter.post("/login",async(req,res)=>{
        // console.log(token);
     //    console.log("user login succesfully!!");
       const firstName = user.firstName;
-       res.render('success',{firstName});
+       res.render('home',{firstName});
    }
    }catch(err){
     //    console.log(err);
@@ -136,6 +146,5 @@ authRouter.post("/login",async(req,res)=>{
    //logout api
 authRouter.post("/logout", async(req,res)=>{
     res.clearCookie("token").json({"message":"user logout successfully"});
-
 });
 module.exports = authRouter;
