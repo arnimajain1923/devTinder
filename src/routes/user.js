@@ -1,7 +1,7 @@
 const express = require('express');
 const { userAuth } = require('../middlewares/auth');
-const ConnectionRequest = require('../models/connectionRequest');
-const User = require('../models/user');
+const ConnectionRequest = require('../models/connectionRequestModel');
+const User = require('../models/userModel');
 
 const userRouter = express.Router();
 const VISIBLE_DATA ='firstName  lastName  photoUrl  age  gender  about skills  interest';

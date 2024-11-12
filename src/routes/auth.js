@@ -1,13 +1,19 @@
 const express = require('express');
-const User = require("../models/user");
+const User = require("../models/userModel");
 const {validateUser} = require("../utils/validation");
 const bcrypt = require('bcrypt');
-const authRouter = express.Router();
+const session = require('express-session');
+const Blog = require("../models/blogModel");
+
 //const uploadFile= require("../middlewares/multer.middleware");
 const multer = require('multer');
 const path = require('path');
 const {uploadOnCloudinary} = require('../utils/cloudinary');
-const { date } = require('joi');
+const { userAuth } = require('../middlewares/auth');
+// const { date } = require('joi');
+
+const authRouter = express.Router();
+authRouter.use(session({secret:process.env.SESSION_SECRET }))
 
 const storage = multer.diskStorage({
     destination:function(req , file , cb){
@@ -115,7 +121,6 @@ authRouter.get('/login', (req, res) => {
 authRouter.post("/login",async(req,res)=>{  
    try{
        const{emailId , password}= req.body;
-   
       const user = await User.findOne({emailId : emailId})  ;
    if(!user){
        throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
@@ -131,12 +136,22 @@ authRouter.post("/login",async(req,res)=>{
    
        //  add the token to cookie and send the response back to user
         res.cookie("token",token ,{ maxAge: 24*60*60*1000, httpOnly: true  });
+        // req.session.user = user;
        //cookie expires in  1 day
        // console.log(token);
     //    console.log("user login succesfully!!");
       const firstName = user.firstName;
-       res.render('home',{firstName});
-   }
+      const allBlogs = await Blog.find({
+          createdBy: user._id 
+      });
+     
+      res.render("home",{
+          user,
+          blogs :allBlogs,
+          firstName,
+      })
+    }
+       
    }catch(err){
     //    console.log(err);
        res.status(400).send(err.message);
@@ -144,7 +159,7 @@ authRouter.post("/login",async(req,res)=>{
    });
 
    //logout api
-authRouter.post("/logout", async(req,res)=>{
+authRouter.post("/logout" , async(req,res)=>{
     res.clearCookie("token").json({"message":"user logout successfully"});
 });
 module.exports = authRouter;

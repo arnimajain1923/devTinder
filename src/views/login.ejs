@@ -3,18 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <%- include("./partials/header.ejs")  %> 
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
     <title>login User</title>
 </head>
 <body>
+    <!-- <div class="container d-flex justify-content-center align-items-center vh-100">
     <h1>login</h1>
     <form action="/login" method="POST">
-        <label for="emailId">emailId:</label>
-        <input type="email" name="emailId" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" name="password" required>
-        <br>
-        <button type="submit">login</button>
+        <div class="mb-3">
+            <label for="emailId" class="form-label">Email address</label>
+            <input type="email" class="form-control" name="emailId" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control"  name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Login</button>
     </form> 
+</div> -->
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="form-container col-md-4">
+            <h2 class="text-center mb-4">Login</h2>
+            <form action="/login" method="POST">
+                <div class="mb-3">
+                    <label for="emailId" class="form-label">Email address</label>
+                    <input type="email" class="form-control" id="emailId" name="emailId" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+            </form>
+            <form action="/signup" method="GET">
+                <div id="switch" class=" fs-5 mb-2 ">New User ?</div>
+                <button type="submit" class="btn btn-primary w-100">Signup</button>
+            </form>
+        </div>
+    </div>
+    <%- include("./partials/script.ejs")  %> 
 </body>
 </html>

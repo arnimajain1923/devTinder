@@ -129,6 +129,10 @@ const userSchema = new mongoose.Schema({
           },
             
          }
+    },
+    status:{
+        type : String,
+        default:"0"
     }
 },
 //timestamp for creation and updation of record

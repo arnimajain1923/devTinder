@@ -8,15 +8,20 @@
 </head>
 <body>
     <%- include('./partials/nav.ejs') %>
+
     <%- include('./partials/home_slider.ejs') %>
+
+    
     <div class="containter mt-3" style="display: flexbox;">
       <% blogs.forEach(blog => { %>
-        <div class="card" style="width: 18rem;">
-          <img src="<%= blog.blogImageUrl  %>" class="card-img-top" alt="...">
-          <div class="card-body">
-            <h5 class="card-title"><%= blog.title%></h5>
-            <p class="card-text"><%=blog.body  %></p>
-            <a href="#" class="btn btn-primary">Go somewhere</a>
+        <div class="col-12 mb-4 d-flex justify-content-center">
+          <div class="card" style="width: 100%; max-width: 600px;">
+            <img src="<%= blog.blogImageUrl %>" class="card-img-top" alt="Blog Image">
+            <div class="card-body">
+              <h5 class="card-title"><%= blog.title %></h5>
+              <p class="card-text"><%= blog.body %></p>
+              <a href="#" class="btn btn-primary">Read more</a>
+            </div>
           </div>
         </div>
       <% }) %>

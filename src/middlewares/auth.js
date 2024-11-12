@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require("../models/user");
+const User = require("../models/userModel");
 const userAuth = async (req, res , next)=>{
     try{
     //read the token from the req cookies 
@@ -17,8 +17,8 @@ const userAuth = async (req, res , next)=>{
     //console.log(user);
 
     if(!user){
-        console.log(user);
-        throw new Error(JSON.stringify({message:"ERROR!!! invalid credentials"}));
+        // console.log(user);
+        res.redirect('/login');
         }
     else{
               req.user = user;

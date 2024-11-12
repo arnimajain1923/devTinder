@@ -1,6 +1,6 @@
 const express = require('express');
 const { userAuth }= require("../middlewares/auth");
-const Blog = require("../models/blog");
+const Blog = require("../models/blogModel");
 const multer = require('multer');
 const path = require('path');
 const uploadOnCloudinary = require("../utils/cloudinary");

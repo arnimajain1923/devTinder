@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>chat Now</title>
+  <!-- <%- include('./partials/header.ejs') %> -->
+  <style>
+
+  </style>
+</head>
+
+<body>
+  <h1>Chat Room</h1>
+  <div id="chat-container">
+    <ul id="messages"></ul>
+    <input id="message-input" autocomplete="off" placeholder="Type a message..." />
+    <button id="send-button">Send</button>
+  </div>
+
+  <%- include('./partials/script.ejs') %>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io({
+      auth: {
+        receiver_id: "<%= user._id %>", 
+        // Authenticate the user in the socket connection
+      }
+    });
+
+    // Send message on button click
+    document.getElementById('send-button').onclick = function() {
+      const message = document.getElementById('message-input').value;
+      const client_offset = Date.now().toString();
+      const sender_id = "<%= user._id %>";
+      const receiver_id =  "<%= user._id %>";
+       // Customize this with actual receiver
+
+      socket.emit('chat message', message, client_offset, sender_id, receiver_id, (response) => {
+        if (response && response.error) {
+          console.error("Error:", response.error);
+        }
+      });
+      document.getElementById('message-input').value = '';
+    };
+
+    // Display received messages
+    socket.on('chat message', (message, id, sender_id, receiver_id) => {
+      const item = document.createElement('li');
+      item.textContent = message;
+      console.log(item);
+      document.getElementById('messages').appendChild(item);
+    });
+  </script>
+</body>
+
+</html>
